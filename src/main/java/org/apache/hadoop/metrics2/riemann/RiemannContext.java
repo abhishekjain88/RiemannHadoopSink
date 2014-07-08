@@ -81,20 +81,21 @@ public class RiemannContext implements MetricsSink {
           metric(metric.value().doubleValue()).
           build());
 
-      metricsQueue.add(events);
       metricName = new StringBuilder();
     }
+
+    metricsQueue.add(events);
   }
 
   @Override
   public void flush() {
     try {
-    while (metricsQueue.size() > 0){
-      if (riemannClient.aSendEventsWithAck(metricsQueue.remove())
-          .deref(2, java.util.concurrent.TimeUnit.SECONDS) == null) {
-        LOG.error("Failed to send some events to Riemann");
+      while (metricsQueue.size() > 0){
+        if (riemannClient.aSendEventsWithAck(metricsQueue.remove())
+            .deref(2, java.util.concurrent.TimeUnit.SECONDS) == null) {
+          LOG.error("Failed to send some events to Riemann");
+        }
       }
-    }
     } catch (Exception e) {
       LOG.error(e);
     }
